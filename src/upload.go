@@ -97,6 +97,8 @@ func AnonfilesToPubkey(url string) (*rsa.PublicKey, bool) {
 		return nil, false
 	}
 
+	defer resp.Body.Close()
+
 	publicKey, err := rsam.BytesToPublicKey(body)
 	if err != nil {
 		fmt.Printf("ERROR: %s\n%s\n", url, "INVALID KEY FILE")

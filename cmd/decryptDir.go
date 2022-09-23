@@ -1,6 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -28,23 +25,25 @@ var decryptDirCmd = &cobra.Command{
 				return
 			}
 			pubKey = pkey
-		} else if url == "" && publicKeyPath != "" {
-			pkey, ok := src.GetPublicKeyFromPath(publicKeyPath)
-			if !ok {
-				return
-			}
-			pubKey = pkey
-		} else if url == "" && publicKey != "" {
+		}
+		if url == "" && publicKey != "" {
 			pubKey, err = rsam.BytesToPublicKey([]byte(publicKey))
 			if err != nil {
 				fmt.Println("ERROR: Invalid given public key.")
 				return
 			}
-		} else {
+		}
+		if url == "" && publicKeyPath != "" {
+			pkey, ok := src.GetPublicKeyFromPath(publicKeyPath)
+			if !ok {
+				return
+			}
+			pubKey = pkey
+		}
+		if url == "" && publicKeyPath == "" && publicKey == "" {
 			fmt.Println("ERROR: Invalid missing url/public key.")
 			return
 		}
-
 		for _, arg := range args {
 			err := src.DecryptDirBayarcoek(arg, extension, pubKey)
 			if err != nil {

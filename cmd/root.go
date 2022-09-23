@@ -1,6 +1,3 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -18,6 +15,7 @@ var (
 	verbose        bool
 	generateUrl    bool
 	url            string
+	overwrite      bool
 )
 
 var rootCmd = &cobra.Command{
@@ -35,4 +33,5 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output")
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }

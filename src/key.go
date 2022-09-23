@@ -9,52 +9,37 @@ import (
 	"time"
 )
 
-func GenerateBayarcoekKeys(privPath, pubPath string) (*rsa.PrivateKey, *rsa.PublicKey) {
+func GenerateBayarcoekKeys(privPath, pubPath string) (string, string, error) {
 	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-	s.Suffix = "Generating Keys..."
-	s.Start()
 
 	var priv *rsa.PrivateKey
 	var pub *rsa.PublicKey
 
-	_, err := os.Stat(privPath)
-	if os.IsNotExist(err) {
-		s.Suffix = "Generating New a Pair Private Key and Public Key..."
-		s.Restart()
-		priv, pub, err = rsam.GeneratePairKeys(2048)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
+	s.Suffix = "Generating New a Pair Private Key and Public Key..."
+	s.Start()
 
-		_ = os.Mkdir("keys", 0777)
+	priv, pub, err := rsam.GeneratePairKeys(2048)
+	if err != nil {
+		fmt.Printf("ERROR: %v\n", err)
+		return "", "", err
+	}
 
-		err = os.WriteFile(privPath, rsam.PrivateKeyToBytes(priv), 0777)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
+	_ = os.Mkdir("keys", 0777)
 
-		err = os.WriteFile(pubPath, rsam.PublicKeyToBytes(pub), 0777)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
-	} else {
-		s.Suffix = "Reading Keys From Given Paths..."
-		s.Restart()
-		privFile, err := os.ReadFile(privPath)
-		priv, err = rsam.BytesToPrivateKey(privFile)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
+	err = os.WriteFile(privPath, rsam.PrivateKeyToBytes(priv), 0777)
+	if err != nil {
+		fmt.Printf("ERROR: %v\n", err)
+		return "", "", err
+	}
 
-		pubFile, err := os.ReadFile(pubPath)
-		pub, err = rsam.BytesToPublicKey(pubFile)
-		if err != nil {
-			fmt.Printf("ERROR: %v\n", err)
-		}
+	err = os.WriteFile(pubPath, rsam.PublicKeyToBytes(pub), 0777)
+	if err != nil {
+		fmt.Printf("ERROR: %v\n", err)
+		return "", "", err
 	}
 
 	s.Stop()
-	return priv, pub
+	return privPath, pubPath, nil
 }
 
 func GetPublicKeyFromPath(path string) (*rsa.PublicKey, bool) {
